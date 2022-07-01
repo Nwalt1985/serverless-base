@@ -1,25 +1,74 @@
-org: ''
-service: 'instagram-proxy'
+org: 'waltonwebservices'
+service: 'some-service'
 frameworkVersion: '3'
 useDotenv: true
 
 plugins:
   - serverless-plugin-webpack
   - serverless-plugin-typescript
+  - serverless-dynamodb-local
   - serverless-offline
 
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      migrate: true
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      convertEmptyValues: true
+
 provider:
-  name: 'aws'
+  name: aws
   stage: ${opt:stage, 'dev'}
-  runtime: 'nodejs14.x'
+  runtime: nodejs14.x
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - Fn::GetAtt: [someTableName, Arn]
   environment:
     NODE_OPTIONS: '--enable-source-maps'
 
 functions:
-  instagram:
-    handler: ./src/handlers/index.handler
+  postMethod:
+    name: postMethod-${self:provider.stage}
+    handler: ./src/handlers/post/post.handler
     events:
       - http:
-          path: instagram/user
+          path: some/path
           method: POST
           cors: true
+
+  someTimedFunction:
+    name: someTimedFunction-${self:provider.stage}
+    handler: ./src/handlers/scheduled/index.handler
+    events:
+      - schedule:
+          rate: rate(7 days)
+          enabled: false
+
+resources:
+  Resources:
+    someTableName:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: some-table-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

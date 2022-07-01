@@ -1,16 +1,41 @@
-# Serverless - AWS Node.js Typescript
+# Instagram Proxy Service
 
-This project has been generated using the [Serverless framework](https://www.serverless.com/).
+This service is to facilitate 0auth requests to Instagram.
 
-For detailed instructions, please refer to the [documentation](https://www.serverless.com/framework/docs/providers/aws/).
+## Schema
 
-## Installation/deployment instructions
+To do
 
-Depending on your preferred package manager, follow the instructions below to deploy your project.
+## Endpoints
 
-> **Requirements**: NodeJS `lts/fermium (v.14.15.0)`. If you're using [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to ensure you're using the same Node version in local and in your lambda's runtime.
+| Method | Stage | URL                                            |
+| ------ | ----- | ---------------------------------------------- |
+| POST   | dev   | http://localhost:3000/dev/instagram/user/token |
 
-### Using NPM
+## Lambda functions
 
-- Run `npm i` to install the project dependencies
-- Run `sls deploy` to deploy this stack to AWS
+- **postUserToken**: This function receives a JSON object constaining a users access key and ID. A call is made to Instagram to convert the token to a long term token. This is returned and saved in the `instagram-auth-tokens-[stage]` table.
+
+- **refreshUserTokens**: This is a scheduled lambda which is triggered every 7 days. This will use the refresh token which is stored in `instagram-auth-tokens-[stage]` table to create a new long term token. The table values will be updated with the new tokens.
+
+## Local development
+
+**serverless offline**
+
+```
+npm run start
+```
+
+**dynamodb-admin** https://www.npmjs.com/package/dynamodb-admin
+
+install gloablly
+
+```
+npm i -g dynamodb-admin
+```
+
+run
+
+```
+npm run dynamodb-local
+```
