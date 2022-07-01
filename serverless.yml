@@ -1,0 +1,25 @@
+org: ''
+service: 'instagram-proxy'
+frameworkVersion: '3'
+useDotenv: true
+
+plugins:
+  - serverless-plugin-webpack
+  - serverless-plugin-typescript
+  - serverless-offline
+
+provider:
+  name: 'aws'
+  stage: ${opt:stage, 'dev'}
+  runtime: 'nodejs14.x'
+  environment:
+    NODE_OPTIONS: '--enable-source-maps'
+
+functions:
+  instagram:
+    handler: ./src/handlers/index.handler
+    events:
+      - http:
+          path: instagram/user
+          method: POST
+          cors: true
