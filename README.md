@@ -1,6 +1,6 @@
-# Instagram Proxy Service
+# Base Service
 
-This service is to facilitate 0auth requests to Instagram.
+A template serverless service.
 
 ## Schema
 
