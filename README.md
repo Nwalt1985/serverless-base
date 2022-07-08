@@ -1,4 +1,4 @@
-# Instagram Proxy Service
+# Base Service
 
 Service description
 
