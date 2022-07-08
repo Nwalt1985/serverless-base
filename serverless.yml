@@ -4,7 +4,6 @@ frameworkVersion: '3'
 useDotenv: true
 
 plugins:
-  - serverless-plugin-webpack
   - serverless-plugin-typescript
   - serverless-dynamodb-local
   - serverless-offline
@@ -36,6 +35,10 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - Fn::GetAtt: [someTableName, Arn]
+    - Effect: 'Allow'
+      Action:
+        - dynamodb:Query
+      Resource: '*'
   environment:
     NODE_OPTIONS: '--enable-source-maps'
 
