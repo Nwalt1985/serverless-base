@@ -1,4 +1,4 @@
-org: 'waltonwebservices'
+org: 'someOrg'
 service: 'some-service'
 frameworkVersion: '3'
 useDotenv: true
