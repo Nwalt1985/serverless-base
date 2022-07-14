@@ -35,5 +35,5 @@ npm i -g dynamodb-admin
 run
 
 ```
-npm run dynamodb-local
+sls dynamodb install &&& npm run dynamodb-local
 ```

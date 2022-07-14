@@ -1,5 +1,5 @@
-org: 'someOrg'
-service: 'some-service'
+org: 'nathan85'
+service: 'pricing-service'
 frameworkVersion: '3'
 useDotenv: true
 
@@ -7,8 +7,19 @@ plugins:
   - serverless-plugin-typescript
   - serverless-dynamodb-local
   - serverless-offline
+  - serverless-dynamodb-autoscaling
 
 custom:
+  capacities:
+    - table: pricingTable
+      read:
+        minimum: 5
+        maximum: 1000
+        usage: 0.75
+      write:
+        minimum: 40
+        maximum: 200
+        usage: 0.5
   dynamodb:
     stages:
       - dev
@@ -24,6 +35,7 @@ provider:
   name: aws
   stage: ${opt:stage, 'dev'}
   runtime: nodejs14.x
+  region: eu-west-2
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -34,43 +46,37 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - Fn::GetAtt: [someTableName, Arn]
+        - Fn::GetAtt: [pricingTable, Arn]
     - Effect: 'Allow'
       Action:
         - dynamodb:Query
       Resource: '*'
   environment:
     NODE_OPTIONS: '--enable-source-maps'
+    CONFIG_REGION: ${self:provider.region}
+    DYNAMODB_TABLE_NAME: pricing-${self:provider.stage}
 
 functions:
-  postMethod:
-    name: postMethod-${self:provider.stage}
-    handler: ./src/handlers/post/post.handler
+  uploadCSV:
+    name: uploadCSV-${self:provider.stage}
+    handler: ./src/handlers/post/uploadCSV.handler
     events:
       - http:
-          path: some/path
+          path: pricing/upload
           method: POST
           cors: true
 
-  someTimedFunction:
-    name: someTimedFunction-${self:provider.stage}
-    handler: ./src/handlers/scheduled/index.handler
-    events:
-      - schedule:
-          rate: rate(7 days)
-          enabled: false
-
 resources:
   Resources:
-    someTableName:
+    pricingTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: some-table-${self:provider.stage}
+        TableName: pricing-${self:provider.stage}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: sku
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: sku
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
