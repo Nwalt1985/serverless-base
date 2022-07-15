@@ -1,3 +1,5 @@
+import { PricingData } from "../types";
+
 export default function batchItems(data: any[]) {
 	const batchAmount = 25;
 
@@ -14,5 +16,5 @@ export default function batchItems(data: any[]) {
 		return resultArray
 	}, [])
 
-	return result
+	return result as PricingData[][]
 }

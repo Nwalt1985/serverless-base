@@ -1,7 +1,8 @@
 import client from './connect';
 import config from '../config';
+import { PricingData } from '../types';
 
-export default async function insertCSVData(data: any[]) {
+export default async function insertCSVData(data: PricingData[]) {
 	try {
 		const db = client();
 
@@ -22,10 +23,9 @@ export default async function insertCSVData(data: any[]) {
 			}
 		};
 
-		await db.batchWrite(params).promise();
+ 		return await db.batchWrite(params).promise();
 
-		return ;
-	} catch (err) {
-		throw new Error(err as any);
+	} catch ({ message }) {
+		throw new Error(message as string);
 	}
 }
