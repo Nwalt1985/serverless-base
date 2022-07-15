@@ -3,13 +3,15 @@ import csv from 'csvtojson';
 import multipart from 'parse-multipart';
 import { StatusCodes } from 'http-status-codes';
 import { APIGatewayProxyEvent, Callback, Context } from 'aws-lambda';
+import { DocumentClient, WriteRequests } from 'aws-sdk/clients/dynamodb';
 import insertCSVData from '../../repository/service';
 import batchItems from '../../helpers';
+import config from '../../config';
 
 // eslint-disable-next-line func-names
 module.exports.handler = async function (event: APIGatewayProxyEvent, context: Context, callback: Callback<any>) {
   try {
-    console.info('HEADERS:', event.headers);
+		const { tableName } = config.dynamodb;
 
     const body = Buffer.from(event.body as string);
 
@@ -23,16 +25,24 @@ module.exports.handler = async function (event: APIGatewayProxyEvent, context: C
 
     const batched = batchItems(csvData);
 
-    console.info('BATCHED:', batched);
+    console.info('BATCHED:', JSON.stringify(batched, null, 2));
 
-    const unprocessed: any[] = [];
+    const unprocessed: {
+			batch: number;
+			failedItems: WriteRequests
+		}[] = [];
 
     for (let i = 0; i < batched.length; i++) {
       // eslint-disable-next-line no-await-in-loop
-      const { UnprocessedItems, ConsumedCapacity } = await insertCSVData(batched[i]);
+      const { UnprocessedItems } = await insertCSVData(batched[i]);
 
       if (Object.entries(UnprocessedItems!).length) {
-        unprocessed.push({ batch: i, unprocessed: UnprocessedItems!['pricing-dev'] || 0, ConsumedCapacity });
+				const failedItems = UnprocessedItems![tableName as keyof DocumentClient.BatchWriteItemOutput] || 0;
+
+        unprocessed.push({
+					batch: i,
+					failedItems
+				});
       }
     }
 

@@ -4,6 +4,7 @@ import { PricingData } from '../types';
 
 export default async function insertCSVData(data: PricingData[]) {
   try {
+		const { tableName } = config.dynamodb;
     const db = client();
 
     const itemsArray = [];
@@ -19,11 +20,12 @@ export default async function insertCSVData(data: PricingData[]) {
 
     const params = {
       RequestItems: {
-        [`${config.dynamodb.tableName}`]: itemsArray,
+        [tableName]: itemsArray,
       },
     };
 
-    return await db.batchWrite(params).promise();
+   return await db.batchWrite(params).promise();
+
   } catch ({ message }) {
     throw new Error(message as string);
   }

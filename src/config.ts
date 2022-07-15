@@ -5,7 +5,7 @@ const AWS = {
 };
 
 const dynamodb = {
-  tableName: process.env.DYNAMODB_TABLE_NAME,
+  tableName: process.env.DYNAMODB_TABLE_NAME as string,
   local: {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
