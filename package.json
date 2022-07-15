@@ -1,5 +1,5 @@
 {
-  "name": "some-service-name",
+  "name": "pricing-service",
   "version": "1.0.0",
   "description": "Serverless aws-nodejs-typescript template",
   "main": "serverless.ts",
