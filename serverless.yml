@@ -13,6 +13,7 @@ plugins:
 custom:
   apiGatewayCaching:
     enabled: true
+  s3bucketName: pricing-data-${self:provider.stage}
   capacities:
     - table: pricingTable
       read:
@@ -55,6 +56,10 @@ provider:
       Action:
         - dynamodb:Query
       Resource: '*'
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::${self:custom.s3bucketName}/*"
   environment:
     NODE_OPTIONS: '--enable-source-maps'
     CONFIG_REGION: ${self:provider.region}
@@ -63,12 +68,13 @@ provider:
 functions:
   uploadCSV:
     name: uploadCSV-${self:provider.stage}
-    handler: ./src/handlers/post/uploadCSV.handler
+    handler: ./src/handlers/s3/uploadCSV.handler
     events:
-      - http:
-          path: pricing/upload
-          method: POST
-          cors: true
+      - s3:
+          bucket: ${self:custom.s3bucketName}
+          event: s3:ObjectCreated:Put
+          rules:
+            - suffix: .csv
 
   getPricingData:
     name: getPricingData-${self:provider.stage}
@@ -98,3 +104,18 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    PricingData:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3bucketName}
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - PUT
+              MaxAge: 3000
