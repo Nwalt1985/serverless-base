@@ -4,7 +4,7 @@ import multipart from 'parse-multipart';
 import { StatusCodes } from 'http-status-codes';
 import { APIGatewayProxyEvent, Callback, Context } from 'aws-lambda';
 import { DocumentClient, WriteRequests } from 'aws-sdk/clients/dynamodb';
-import insertCSVData from '../../repository/service';
+import { insertCSVData } from '../../repository/service';
 import batchItems from '../../helpers';
 import config from '../../config';
 

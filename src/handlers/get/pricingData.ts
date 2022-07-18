@@ -1,6 +1,7 @@
 /* eslint-disable import/no-import-module-exports */
 import { StatusCodes } from 'http-status-codes';
 import { APIGatewayProxyEvent, Callback, Context } from 'aws-lambda';
+import { getPricingData } from '../../repository/service';
 
 type PricingRequest = {
 	sku: string;
@@ -11,11 +12,11 @@ module.exports.handler = async function (event: APIGatewayProxyEvent, context: C
   try {
 		const { sku } = event.queryStringParameters as PricingRequest;
 
-		console.log(sku)
+		const data = await getPricingData(sku);
 
     const response = {
       statusCode: StatusCodes.OK,
-      body: ''
+      body: JSON.stringify(data, null, 2)
     };
 
     callback(null, response);

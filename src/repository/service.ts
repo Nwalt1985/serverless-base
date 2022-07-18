@@ -2,7 +2,7 @@ import client from './connect';
 import config from '../config';
 import { PricingData } from '../types';
 
-export default async function insertCSVData(data: PricingData[]) {
+export async function insertCSVData(data: PricingData[]) {
   try {
 		const { tableName } = config.dynamodb;
     const db = client();
@@ -29,4 +29,26 @@ export default async function insertCSVData(data: PricingData[]) {
   } catch ({ message }) {
     throw new Error(message as string);
   }
+}
+
+export async function getPricingData(sku: string) {
+	try {
+		const db = client();
+
+		const params = {
+			TableName: config.dynamodb.tableName as string,
+			Key: {
+				sku
+			}
+		};
+
+		const response = await db.get(params).promise();
+
+		if(!response.Item) return 'No pricing data found';
+
+		return response.Item as PricingData;
+
+	} catch({message}) {
+		throw new Error(message as string)
+	}
 }
