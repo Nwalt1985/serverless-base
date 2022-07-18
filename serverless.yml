@@ -13,7 +13,7 @@ plugins:
 custom:
   apiGatewayCaching:
     enabled: true
-  s3bucketName: pricing-data-${self:provider.stage}
+  s3bucketName: pricing-data-${self:provider.stage}-s3
   capacities:
     - table: pricingTable
       read:
@@ -72,6 +72,7 @@ functions:
     events:
       - s3:
           bucket: ${self:custom.s3bucketName}
+          existing: true
           event: s3:ObjectCreated:Put
           rules:
             - suffix: .csv
