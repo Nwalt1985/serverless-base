@@ -4,19 +4,19 @@ import { APIGatewayProxyEvent, Callback, Context } from 'aws-lambda';
 import { getPricingData } from '../../repository/service';
 
 type PricingRequest = {
-	sku: string;
-}
+  sku: string;
+};
 
 // eslint-disable-next-line func-names
 module.exports.handler = async function (event: APIGatewayProxyEvent, context: Context, callback: Callback<any>) {
   try {
-		const { sku } = event.queryStringParameters as PricingRequest;
+    const { sku } = event.queryStringParameters as PricingRequest;
 
-		const data = await getPricingData(sku);
+    const data = await getPricingData(sku);
 
     const response = {
       statusCode: StatusCodes.OK,
-      body: JSON.stringify(data, null, 2)
+      body: JSON.stringify(data, null, 2),
     };
 
     callback(null, response);
